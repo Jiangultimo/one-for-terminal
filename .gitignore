@@ -1,0 +1,26 @@
+# 安装日志文件
+.one-for-terminal-install.log
+
+# 备份目录
+.one-for-terminal-backup-*/
+
+# macOS 系统文件
+.DS_Store
+
+# macOS 缩略图
+._*
+
+# Linux 临时文件
+*~
+.directory
+
+# 编辑器临时文件
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.sublime-*
+
+# 测试生成的文件
+test-output/
