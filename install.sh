@@ -123,6 +123,25 @@ check_sudo() {
     fi
 }
 
+# 用法: version_ge "当前版本" "最低要求版本"
+# 返回: 0(真) 表示达标，1(假) 表示未达标
+version_ge() {
+    local current_ver="$1"
+    local required_ver="$2"
+
+    if command -v dpkg >/dev/null 2>&1; then
+        # 优先使用 dpkg (Debian/Ubuntu 原生支持，处理 epoch 等复杂版本号更强)
+        dpkg --compare-versions "$current_ver" ge "$required_ver"
+    else
+        # Fallback: 使用 sort -V
+        # 逻辑：将两个版本排序，取出最小的一个。
+        # 如果 "最小的一个" == "最低要求版本"，说明 "当前版本" >= "最低要求版本"
+        local lowest
+        lowest=$(printf "%s\n%s" "$current_ver" "$required_ver" | sort -V | head -n1)
+        [ "$lowest" = "$required_ver" ]
+    fi
+}
+
 # ----------------------------------------------------------------------
 #  安装软件包
 # ----------------------------------------------------------------------
@@ -248,6 +267,7 @@ install_pkgs() {
         log_warn "请自行下载并安装 Nerd Font 字体: https://www.nerdfonts.com/font-downloads"
     fi
 }
+
 
 # ----------------------------------------------------------------------
 #  安装 oh-my-zsh
@@ -438,14 +458,90 @@ install_lvim() {
     fi
 
     log_info "正在安装 LunarVim..."
-    LV_BRANCH='release-1.3/neovim-0.10'
-    export LV_BRANCH
 
-    if bash <(curl -s https://raw.githubusercontent.com/lunarvim/lunarvim/master/utils/installer/install.sh) --yes 2>&1 | tee -a "$LOG_FILE"; then
+    LV_BRANCH='release-1.4/neovim-0.9'
+    set -o pipefail
+    if curl -fsS "https://raw.githubusercontent.com/LunarVim/LunarVim/$LV_BRANCH/utils/installer/install.sh" | bash -s -- --yes 2>&1 | tee -a "$LOG_FILE"; then
         log_success "LunarVim 安装成功"
     else
         log_error "LunarVim 安装失败，但不影响其他功能"
     fi
+    set +o pipefail
+}
+
+# init fzf
+init_fzf() {
+    # 设定要求的版本 (0.48.0 之后才支持 source <(fzf --zsh))
+    local option_version="0.48.0"
+
+    # 检测 fzf 是否安装
+    if ! command -v fzf >/dev/null 2>&1; then
+        echo "fzf 未安装，跳过初始化"
+        return 1
+    fi
+
+    # 获取当前版本
+    local fzf_version
+    fzf_version=$(fzf --version | awk '{print $1}')
+    # echo "当前 fzf 版本: $fzf_version"
+
+    if version_ge "$fzf_version" "$option_version"; then
+        # echo "版本足够新，使用新版加载方式"
+        source <(fzf --zsh)
+    else
+        echo "⚠️ fzf 版本较旧 ($fzf_version)，正在注入旧版兼容配置..."
+        
+        # === 这里是修改后的 else 逻辑 ===
+        local legacy_binding="/usr/share/doc/fzf/examples/key-bindings.zsh"
+        local legacy_completion="/usr/share/doc/fzf/examples/completion.zsh"
+        
+        # 防止重复插入
+        if ! grep -q "$legacy_binding" ~/.zshrc; then
+            # 利用 sed 找到 oh-my-zsh.sh 那一行，在下面追加
+            sed -i "/source \$ZSH\/oh-my-zsh.sh/a \\
+# fzf legacy config\\
+source $legacy_binding\\
+[[ -f $legacy_completion ]] && source $legacy_completion" ~/.zshrc
+            
+            echo "✅ 已将旧版配置插入到 .zshrc 中 (位于 oh-my-zsh.sh 下方)"
+        else
+            echo "ℹ️ 配置已存在，无需重复添加"
+        fi
+    fi
+}
+
+# init eza
+init_eza() {
+    # 1. 检查是否安装
+    if ! command -v eza >/dev/null 2>&1; then
+        echo "⚠️ eza 未安装，跳过别名设置"
+        return 1
+    fi
+
+    # 2. 定义一个唯一的标记，用于识别是否已经由本脚本配置过
+    local marker="# [Auto-Config] eza aliases"
+
+    # 3. 检查标记是否存在 (而不是检查具体的 alias 命令)
+    if grep -Fq "$marker" ~/.zshrc; then
+        echo "ℹ️ eza 配置已存在，跳过。"
+        return 0
+    fi
+
+    echo "🔧 正在配置 eza 别名..."
+
+    # 4. 使用 cat <<EOF 的方式写入一个带注释的代码块
+    # 这样用户以后打开 .zshrc 一眼就知道这是干嘛的
+    cat <<EOF >> ~/.zshrc
+
+$marker
+# 自动启用 icons (如果有的话) 并替换常用命令
+alias ls='eza --icons'
+alias ll='eza -alF --icons --time-style=long-iso --group-directories-first'
+alias la='eza -a --icons'
+alias tree='eza --tree --icons'
+EOF
+
+    echo "✅ eza 别名已写入 .zshrc"
 }
 
 # ----------------------------------------------------------------------
@@ -465,6 +561,12 @@ main() {
 
     # 安装软件包
     install_pkgs
+
+    # 初始化 fzf
+    init_fzf
+
+    # 初始化 eza
+    init_eza
 
     # 安装 oh-my-zsh
     install_omz
