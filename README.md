@@ -16,13 +16,27 @@
 
 TL;DR
 
-**一键安装脚本：[https://github.com/Jiangultimo/one-for-terminal](https://github.com/Jiangultimo/one-for-terminal)**
+**一键安装：**
+
+```bash
+bash <(curl -fsSL https://raw.githubusercontent.com/Jiangultimo/one-for-terminal/main/install.sh)
+```
+
+或者克隆仓库后执行：
+
+```bash
+git clone https://github.com/Jiangultimo/one-for-terminal.git
+cd one-for-terminal
+bash install.sh
+```
 
 ---
 
 # **3. 步骤**
 
-iTerm2 和 WSL 的安装省略（WSL 现在体验已经足够好，可替代 XSHELL）。
+> 以下是手动安装的详细步骤，供想要自定义配置的用户参考。使用一键脚本的话可以跳过。
+
+iTerm2 和 WSL 的安装省略（WSL 现在体验已经很好了）。
 
 ## **1. 安装 zsh**
 
@@ -38,8 +52,7 @@ chsh -s $(which zsh)
 ## **2. 安装 oh-my-zsh**
 
 官方安装脚本：[https://ohmyz.sh/#install](https://ohmyz.sh/#install)
-安装后会生成 .zshrc。
-我习惯把 ZSH_THEME 改成 random（非必须，后面 starship 会覆盖）。
+安装后会生成 `.zshrc`。
 
 ## **3. 安装 Nerd Fonts（必选）**
 
@@ -49,7 +62,7 @@ chsh -s $(which zsh)
 
 ## **4. 安装 Starship**
 
-不是 SpaceX 的那艘，是用 Rust 写的跨 Shell Prompt。
+不是 SpaceX 的那艘，是用 Rust 写的跨平台命令行提示符工具。
 文档：[https://starship.rs/installing/](https://starship.rs/installing/)
 
 ## **5. 配置 Starship**
@@ -72,7 +85,13 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
   ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ```
 
-其他常用的：sudo, z，按需启用。
+克隆完后，还需要在 `~/.zshrc` 中启用插件：
+
+```bash
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting)
+```
+
+其他常用的：`sudo`（双击 ESC 自动加 sudo）、`z`（快速跳转目录），按需启用。
 
 ## **7. Vim / NeoVim**
 
@@ -93,18 +112,18 @@ Vim 原作者已离世，社区延续出了更现代的 **NeoVim**。
 
 ## **10. 安装 tig**
 
-更舒服的 `git log` 浏览器：
+更舒服的 `git log` 浏览器，终端里看 Git 历史和 diff 很方便。
 
-```
-tig
-```
-
-效果如图
+效果如图：
 ![效果展示](images/62199.png)
 
 ## **11. 安装 neofetch / lolcat / cowsay（可选）**
 
-纯好玩。
+- **neofetch**：在终端显示系统信息和 ASCII Logo
+- **lolcat**：让输出变成彩虹色
+- **cowsay**：让一头牛说话
+
+纯好玩，装逼利器。
 
 # **4. 成果**
 
