@@ -76,18 +76,17 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git \
 
 ## **7. Vim / NeoVim**
 
-Vim 原作业作者已离世，社区延续出了更现代的 **NeoVim**。
+Vim 原作者已离世，社区延续出了更现代的 **NeoVim**。
 我用的是基于 NeoVim 的 **LunarVim**：
 [https://www.lunarvim.org/](https://www.lunarvim.org/)
 
 ## **8. 用 eza 替代 ls/ll**
 
-现代版 ls，颜值和可读性大幅提升。
+现代版 ls，颜值和可读性大幅提升：[https://github.com/eza-community/eza](https://github.com/eza-community/eza)
 
 ## **9. 安装 fzf（强烈推荐）**
 
-模糊搜索神器：
-https://github.com/junegunn/fzf
+模糊搜索神器：[https://github.com/junegunn/fzf](https://github.com/junegunn/fzf)
 
 注意：
 现代版本的 shell 集成更简单，按 README 的指引操作即可。
@@ -115,7 +114,7 @@ tig
 
 ---
 
-# **📄 许可证**
+## 📄 许可证
 
 本项目采用 [MIT 许可证](LICENSE) 开源。
 
