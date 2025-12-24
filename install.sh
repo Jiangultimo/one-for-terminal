@@ -280,6 +280,13 @@ install_omz() {
 
     log_info "正在安装 oh-my-zsh..."
 
+    # 如果 .zshrc 不存在，先触发 zsh 配置向导并自动跳过
+    if [[ ! -f "$HOME/.zshrc" ]]; then
+        log_info "检测到 .zshrc 不存在，正在初始化 zsh 配置..."
+        echo "q" | zsh -i 2>/dev/null || true
+        log_success "zsh 初始化完成"
+    fi
+
     # 备份现有的 .zshrc
     backup_file "$HOME/.zshrc"
 
@@ -562,14 +569,14 @@ main() {
     # 安装软件包
     install_pkgs
 
+    # 安装 oh-my-zsh
+    install_omz
+
     # 初始化 fzf
     init_fzf
 
     # 初始化 eza
     init_eza
-
-    # 安装 oh-my-zsh
-    install_omz
 
     # 设置默认 Shell
     set_default_shell
